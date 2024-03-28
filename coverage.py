@@ -1,32 +1,37 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 
-def simulation(theta):
-    return theta**(-1.5) + np.random.normal(0, 0.001)
+def simulator(theta):
+    return theta**2 + np.random.normal(0, 0.5, 1)
 
 def prior(N):
     return np.random.uniform(1, 10, N)
 
-def likelihood(theta, data):
-    return -0.5 * (data - theta**(-1.5))**2/0.1**2 - 0.5*np.log(0.001**2)
-
 def posterior(theta, data):
-    return likelihood(theta, data) + np.log(1/9)
+    return norm.pdf(theta**2, loc=data, scale=0.5)
 
-N = 10000
+def generate_samples(n, data):
+    return norm.rvs(loc=data, scale=0.1, size=n)
+
+N = 1000
 samples = prior(N)
-data = [simulation(samples[i]) for i in range(N)]
+samples = np.sort(samples)
+true_data = 2.3**2 + np.random.normal(0, 0.5, 1)
 
-true_data = simulation(3)
 post = np.array([posterior(samples[i], true_data) for i in range(N)])
-post = np.exp(post - np.max(post)) # posterior estimator
+post = post/np.max(post) # posterior estimator
+print(post)
 
 plt.hist(samples, bins=50, density=True, alpha=0.5, label='Prior')
 plt.hist(samples, weights=post, 
          bins=50, density=True, alpha=0.5, label='Posterior')
+plt.axvline(2.3, ls='--')
 plt.legend()
 plt.show()
+sys.exit(1)
 
-alpha_hpdr = []
-for i in range(len(samples)):
-    alpha = np.mean([1])
+test_samples = generate_samples(1000)
+f = []
+for i in range(len(test_samples)):
+    f = 0
